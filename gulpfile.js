@@ -9,6 +9,10 @@ const projects = {
         config: './src/typescript/tab-bar/tsconfig.json',
         sass: './src/sass/tab-bar/tab-bar.scss',
         watch: ['./src/typescript/tab-bar/**/*.ts']
+    },
+    core: {
+        config: './src/typescript/core/tsconfig.json',
+        watch: ['./src/typescript/core/**/*.ts']
     }
 }
 
@@ -43,6 +47,11 @@ gulp.task('tabbar', () => {
     return makeProject(projects.tabbar);
 })
 
-gulp.task('build', ['tabbar'], () => {
+gulp.task('core', () => {
+    return makeProject(projects.core);
+})
+
+gulp.task('build', ['tabbar', 'core'], () => {
     gulp.watch(getWatchFiles(projects.tabbar), ['tabbar']);
+    gulp.watch(getWatchFiles(projects.core), ['core']);
 });

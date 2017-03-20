@@ -1,34 +1,28 @@
 namespace Workspace.Tabs {
-    export class TabBar {
+    export class TabGroup {
 
-        private _element: HTMLElement;
+        public tabContainer: TabContainer;
+        public contentContainer: ContentContainer;
+
+        protected _element: HTMLDivElement;
+
         private _tabs: Tab[] = [];
 
-        public get element(): HTMLElement {
+        public get element(): HTMLDivElement {
             return this._element;
         }
 
-        public constructor(element: HTMLElement) {
+        public constructor(element: HTMLDivElement) {
             this._element = element;
+            this.tabContainer = new TabContainer(this);
+            this.contentContainer = new ContentContainer(this);
         }
 
-        public addTab(tab: Tab) {
+        public addTab(tab: Tab): number {
             this._tabs.push(tab);
-            tab.tabBar = this;
-            tab.initTab();
-            this.update();
-        }
-
-        public removeTab(tab: Tab) {
-            let idx = this._tabs.indexOf(tab);
-            this._tabs.splice(idx, 1);
-        }
-
-        public moveTab(tab: Tab, position: number) {
-            let idx = this._tabs.indexOf(tab);
-            this._tabs.splice(idx, 1);
-            this._tabs.splice(position, 0, tab);
-            this.update();
+            tab.setTabGroup(this);
+            tab.createTab(this.tabContainer.element);
+            return this.tabIndex(tab);
         }
 
         public tabIndex(tab: Tab): number {
@@ -52,7 +46,14 @@ namespace Workspace.Tabs {
 
         public activateLast() {
             this.deactivate();
-            this._tabs[this._tabs.length - 1].activate();
+            // this._tabs[this._tabs.length - 1].activate();
+        }
+
+        public moveTab(tab: Tab, position: number) {
+            let idx = this._tabs.indexOf(tab);
+            this._tabs.splice(idx, 1);
+            this._tabs.splice(position, 0, tab);
+            this.update();
         }
 
         public getTabById(id: string): Tab | null {
@@ -65,20 +66,18 @@ namespace Workspace.Tabs {
             return null;
         }
 
-        public update() {
-            let tabbar = this._createTabBar();
-            for (let i = 0, l = this._tabs.length; i < l; i++) {
-                let t = this._tabs[i];
-                t.element = t.createTab(tabbar, t.title);
-            }
-            this._element.innerHTML = '';
-            this._element.appendChild(tabbar);
+        public removeTab(tab: Tab) {
+            let idx = this._tabs.indexOf(tab);
+            this._tabs.splice(idx, 1);
         }
 
-        private _createTabBar(): HTMLDivElement {
-            let tabbar = document.createElement('div');
-            tabbar.classList.add('tab-bar');
-            return tabbar;
+        public update() {
+            this.tabContainer.element.innerHTML = '';
+            for (let i = 0, l = this._tabs.length; i < l; i++) {
+                let t = this._tabs[i];
+                t.element.classList.remove('drag-hover');
+                this.tabContainer.element.appendChild(t.element);
+            }
         }
     }
 }

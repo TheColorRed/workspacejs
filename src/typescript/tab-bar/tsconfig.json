@@ -7,8 +7,13 @@
         "outFile": "dist/tabs/tab-bar.js",
         "removeComments": true
     },
+    "include": [
+        "../../../dist/workspace.d.ts"
+    ],
     "files": [
-        "./core/TabBar.ts",
+        "./core/TabGroup.ts",
+        "./core/ContentContainer.ts",
+        "./core/TabContainer.ts",
         "./core/Tab.ts",
         "./core/Content.ts",
         "./init.ts"

@@ -1,7 +1,16 @@
 .workspace-tabs {
     font-family: Arial, Helvetica, sans-serif;
     background: #252526;
+    position: relative;
+
+    & * {
+        box-sizing: border-box;
+    }
+
     .tab-bar {
+
+        white-space: nowrap;
+        overflow: auto;
         .tab {
             display: inline-block;
             color: #d2d3d1;
@@ -15,17 +24,22 @@
             &.selected {
                 background-color: #646464;
             }
+
             &:hover:not(.selected) {
                 background-color: #333;
             }
 
-            &:hover .close{
+            &:hover .close {
                 background: #db4a4a;
                 color: #d2d3d1;
             }
 
             &.drag-hover {
-                background: #ccc;
+                background: #777;
+            }
+
+            &.drag-hover * {
+                pointer-events: none;
             }
 
             .title {
@@ -33,6 +47,7 @@
                 display: inline-block;
                 vertical-align: middle;
             }
+
             .close {
                 background: transparent;
                 border-radius: 100%;
@@ -47,7 +62,25 @@
                 padding-left: 1px;
                 color: transparent;
             }
+
             .close:before { content: "\00d7"; }
         }
     }
+
+    .tab-content {
+        position: absolute;
+        width: 100%;
+
+        .content {
+            display: none;
+        }
+
+        .content.selected {
+            display: block;
+        }
+    }
+}
+
+::-webkit-scrollbar {
+    display: none;
 }
