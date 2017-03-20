@@ -1,0 +1,16 @@
+{
+    "compilerOptions": {
+        "target": "es5",
+        "module": "system",
+        "strictNullChecks": true,
+        "declaration": true,
+        "outFile": "dist/tabs/tab-bar.js",
+        "removeComments": true
+    },
+    "files": [
+        "./core/TabBar.ts",
+        "./core/Tab.ts",
+        "./core/Content.ts",
+        "./init.ts"
+    ]
+}
