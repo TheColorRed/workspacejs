@@ -1,11 +1,16 @@
 namespace Workspace.Tabs {
 
-    export interface TabItem {
+    export interface TabOptions {
         title?: string,
         icon?: HTMLImageElement,
         content?: HTMLElement | string,
         contentUrl?: string,
-        index?: number
+        index?: number,
+        tooltip?: string,
+
+        closable?: boolean,
+        movable?: boolean,
+        enabled?: boolean
     }
 
     export class Tab {
@@ -14,31 +19,65 @@ namespace Workspace.Tabs {
 
         protected _element: HTMLDivElement;
         protected _icon: HTMLImageElement;
-        protected _title: string = '';
+        protected _title: string = 'Tab';
         protected _initIndex: number | undefined;
         protected _init: boolean = false;
         protected _content: Content;
 
-        protected _options: TabItem | undefined;
-        protected _isActive: boolean = false;
+        protected _options: TabOptions | undefined;
 
-        public get isActive(): boolean {
-            return this._isActive;
+        protected _isSelected: boolean = false;
+        protected _isEnabled: boolean = true;
+        protected _isClosable: boolean = true;
+        protected _isMovable: boolean = true;
+
+        public get element(): HTMLDivElement { return this._element; }
+        public get content(): Content { return this._content; }
+
+        ////////////////////////////////////////////////////////////////////////
+        /// Tab toggles
+        ////////////////////////////////////////////////////////////////////////
+
+        public get isSelected(): boolean { return this._isSelected; }
+
+        public get isEnabled(): boolean { return this._isEnabled; }
+        public set isEnabled(value: boolean) {
+            this._isEnabled = value;
+            if (!value) {
+                this.element.classList.add('disabled');
+            } else {
+                this.element.classList.remove('disabled');
+            }
         }
 
-        public get element(): HTMLDivElement {
-            return this._element;
+        public get isClosable(): boolean { return this._isClosable; }
+        public set isClosable(value: boolean) {
+            this._isClosable = value;
+            if (value) {
+                this._createTabCloseButton(this.element);
+            } else {
+                this._removeTabCloseButton(this.element);
+            }
         }
 
-        public get content(): Content {
-            return this._content;
+        public get isMovable(): boolean { return this._isMovable; }
+        public set isMovable(value: boolean) {
+            this._isMovable = value;
+            this.element.draggable = value;
         }
 
-        public constructor(options?: TabItem) {
+        public set title(value: string) {
+            this._title = value;
+            let title = this._element.querySelector('span.title') as HTMLSpanElement;
+            if (title) { title.innerText = value; }
+        }
+
+        public set tooltip(value: string) {
+            this.element.title = value;
+        }
+
+        public constructor(options?: TabOptions) {
             this._options = options;
-            this.setTitle((options || {}).title || 'Tab');
-            this.setIcon((options || {}).icon || new Image);
-            this._initIndex = (options || {}).index || undefined;
         }
 
         public setTabGroup(tabGroup: TabGroup) {
@@ -75,7 +114,9 @@ namespace Workspace.Tabs {
 
             // Add title and close button
             this._createTabTitle(tab, this._title);
-            this._createTabClose(tab);
+            if (this._isClosable) {
+                this._createTabCloseButton(tab);
+            }
 
             // Set the content
             if (this._options && this._options.contentUrl) {
@@ -100,13 +141,13 @@ namespace Workspace.Tabs {
         }
 
         public activate() {
-            this._isActive = true;
+            this._isSelected = true;
             this._element ? this._element.classList.add('selected') : null;
             this.content ? this.content.activate() : null;
         }
 
         public deactivate() {
-            this._isActive = false;
+            this._isSelected = false;
             this._element ? this._element.classList.remove('selected') : null;
             this.content ? this.content.deactivate() : null;
         }
@@ -124,25 +165,28 @@ namespace Workspace.Tabs {
 
         private onTabClick(e: MouseEvent) {
             e.stopPropagation();
-            this.tabGroup.element.dispatchEvent(new CustomEvent('workspace.tab.deactivate'));
+            if (!this._isEnabled) { return; }
+            this.tabGroup.dispatchEvent(Evt.TabDeactivate)
             this.tabGroup.activate(this);
         }
 
         private onTabCloseClick(e: MouseEvent) {
             e.stopPropagation();
             e.preventDefault();
+            if (!this._isClosable) { return; }
             let isSelected = this._element.classList.contains('selected');
             let idx = this.tabGroup.tabIndex(this);
             this.removeTab();
-            this.content.removeContent();
+            if (this.content) {
+                this.content.removeContent();
+            }
             if (isSelected) {
                 this.tabGroup.activate(idx);
             }
         }
 
         private onTabDragStart(e: DragEvent) {
-            console.log('start')
-            if (e.target) {
+            if (e.target && this._isMovable) {
                 e.dataTransfer.setData('id', (<HTMLDivElement>e.target).id);
             }
         }
@@ -152,17 +196,20 @@ namespace Workspace.Tabs {
         }
 
         private onTabDragEnter(e: DragEvent) {
+            if (!this.isMovable) { return; }
             let target = <HTMLElement>e.currentTarget;
             target.classList.add('drag-hover');
         }
 
         private onTabDragLeave(e: DragEvent) {
+            if (!this.isMovable) { return; }
             let target = <HTMLElement>e.currentTarget;
             target.classList.remove('drag-hover');
         }
 
         private onTabDrop(e: DragEvent) {
             e.preventDefault();
+            if (!this._isMovable) { return; }
             let id = e.dataTransfer.getData('id');
             let tab = this.tabGroup.getTabById(id);
             if (tab) {
@@ -181,9 +228,21 @@ namespace Workspace.Tabs {
         private _initTab(): HTMLDivElement {
             let tab = document.createElement('div');
             this._element = tab;
-            tab.draggable = true;
+
+            this.setTitle(this._options && this._options.title ? this._options.title : this._title);
+            this.setIcon(this._options && this._options.icon ? this._options.icon : new Image);
+            this._initIndex = this._options && this._options.index ? this._options.index : this._initIndex;
+            this.isClosable = this._options && typeof this._options.closable == 'boolean' ? this._options.closable : this._isClosable;
+            this.isMovable = this._options && typeof this._options.movable == 'boolean' ? this._options.movable : this._isMovable;
+            this.isEnabled = this._options && typeof this._options.enabled == 'boolean' ? this._options.enabled : this._isEnabled;
+
+            tab.draggable = this.isMovable;
+            if (this._options && this._options.tooltip) {
+                tab.title = this._options.tooltip;
+            }
             tab.classList.add('tab');
             tab.setAttribute('id', (Math.random().toString(36) + Math.random().toString(36)).substr(2, 6));
+
             return tab;
         }
 
@@ -195,21 +254,41 @@ namespace Workspace.Tabs {
             tab.ondrop = this.onTabDrop.bind(this);
             tab.onmousedown = this.onTabMouseDown.bind(this);
             tab.onclick = this.onTabClick.bind(this);
-            this.tabGroup.element.addEventListener('workspace.tab.deactivate', this.deactivate.bind(this));
+            this.tabGroup.element.addEventListener(Evt.TabDeactivate, this.deactivate.bind(this));
         }
 
         private _createTabTitle(tab: HTMLDivElement, title: string) {
-            let t = document.createElement('span');
-            t.classList.add('title');
-            t.innerText = title;
-            tab.appendChild(t);
+            let t = tab.querySelector('span.title') as HTMLSpanElement;
+            if (!t) {
+                t = document.createElement('span');
+                t.classList.add('title');
+                t.innerText = title;
+                tab.insertAdjacentElement('afterbegin', t);
+            }
         }
 
-        private _createTabClose(tab: HTMLDivElement) {
-            let c = document.createElement('span');
-            c.classList.add('close');
-            c.onclick = this.onTabCloseClick.bind(this);
-            tab.appendChild(c);
+        private _createTabCloseButton(tab: HTMLDivElement) {
+            let c = tab.querySelector('span.close') as HTMLSpanElement;
+            if (!c) {
+                c = document.createElement('span');
+                c.classList.add('close');
+                c.onclick = this.onTabCloseClick.bind(this);
+                tab.insertAdjacentElement('beforeend', c);
+            }
+        }
+
+        private _removeTabTitle(tab: HTMLDivElement) {
+            let c = tab.querySelector('span.title') as HTMLSpanElement;
+            if (c) {
+                tab.removeChild(c);
+            }
+        }
+
+        private _removeTabCloseButton(tab: HTMLDivElement) {
+            let c = tab.querySelector('span.close') as HTMLSpanElement;
+            if (c) {
+                tab.removeChild(c);
+            }
         }
     }
 }

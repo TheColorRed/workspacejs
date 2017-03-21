@@ -8,6 +8,7 @@
         "removeComments": true
     },
     "files": [
-        "./Http.ts"
+        "./Http.ts",
+        "./Log.ts"
     ]
 }

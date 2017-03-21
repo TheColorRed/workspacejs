@@ -31,7 +31,7 @@ namespace Workspace.Tabs {
                 content.innerHTML = html;
             }
             this._element = content;
-            if (this.tab.isActive) {
+            if (this.tab.isSelected) {
                 this.tab.tabGroup.activate(this.tab);
             }
             this.tab.tabGroup.contentContainer.element.appendChild(content);

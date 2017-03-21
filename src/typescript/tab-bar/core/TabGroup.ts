@@ -1,4 +1,27 @@
 namespace Workspace.Tabs {
+
+    export const tabGroups: TabGroup[] = [];
+
+    export class Evt {
+        public static TabDeactivate = 'workspace.tab.deactivate';
+        public static UpdateTabBar = 'workspace.tab.update';
+    }
+
+    export function tabGroup(selector: string): TabGroup | null {
+        let tabGroupElements = document.querySelectorAll(selector) as NodeListOf<HTMLElement>;
+        for (let i = 0, l = tabGroupElements.length; i < l; i++) {
+            let groupElement = tabGroupElements[i];
+            for (let i = 0, l = tabGroups.length; i < l; i++) {
+                let group = tabGroups[i];
+                if (groupElement == group.element) {
+                    return group;
+                }
+            }
+        }
+        return null;
+    }
+
+
     export class TabGroup {
 
         public tabContainer: TabContainer;
@@ -12,10 +35,14 @@ namespace Workspace.Tabs {
             return this._element;
         }
 
+        public set id(value: string) { this.element.id = value; }
+        public get id(): string { return this.element.id; }
+
         public constructor(element: HTMLDivElement) {
             this._element = element;
             this.tabContainer = new TabContainer(this);
             this.contentContainer = new ContentContainer(this);
+            // this.id = (Math.random().toString(36) + Math.random().toString(36)).substr(2, 6);
         }
 
         public addTab(tab: Tab): number {
@@ -30,17 +57,27 @@ namespace Workspace.Tabs {
         }
 
         public deactivate() {
-            this._element.dispatchEvent(new CustomEvent('workspace.tab.deactivate'));
+            this.dispatchEvent(Evt.TabDeactivate);
         }
 
-        public activate(tab: number | Tab = 0) {
+        public dispatchEvent(event: string) {
+            this._element.dispatchEvent(new CustomEvent(event));
+        }
+
+        public activate(tab: number | Tab) {
             if (this._tabs.length > 0 && (tab instanceof Tab || typeof tab == 'number')) {
                 this.deactivate();
                 if (tab instanceof Tab) {
                     tab.activate();
-                } else if (typeof tab == 'number') {
-                    this._tabs[tab].activate();
+                } else if (typeof tab == 'number' && tab >= 0) {
+                    if (this._tabs[tab]) {
+                        this._tabs[tab].activate();
+                    } else {
+                        Log.warning(`A tab at index ${tab} does not exist with max index of ${this._tabs.length - 1}.`);
+                    }
                 }
+            } else {
+                Log.warning('No tab could be activated.');
             }
         }
 
