@@ -1,3 +1,16 @@
-<h1>Tooltip</h1>
+<section>
+    <h1>Tooltip</h1>
 
-To add a tooltip to an item
+    <p>To add a tooltip to an item add the <code>tooltip</code> option to the <code>Tab</code> constructor.</p>
+
+    <pre><code class="language-javascript">// Get a tab group
+let tabGroup = Workspace.tabGroup('#tab-group-1');
+
+// Add a new tab with a tooltip
+tabGroup.addTab(new Workspace.Tab({
+    // Set the title of the tab
+    title: 'Tool Tip',
+    // Set the tooltip to display upon mouseover
+    tooltip: 'I am a tooltip'
+}));</code></pre>
+</section>

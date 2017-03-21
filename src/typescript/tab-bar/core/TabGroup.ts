@@ -1,12 +1,4 @@
-namespace Workspace.Tabs {
-
-    export const tabGroups: TabGroup[] = [];
-
-    export class Evt {
-        public static TabDeactivate = 'workspace.tab.deactivate';
-        public static UpdateTabBar = 'workspace.tab.update';
-    }
-
+namespace Workspace {
     export function tabGroup(selector: string): TabGroup | null {
         let tabGroupElements = document.querySelectorAll(selector) as NodeListOf<HTMLElement>;
         for (let i = 0, l = tabGroupElements.length; i < l; i++) {
@@ -21,11 +13,17 @@ namespace Workspace.Tabs {
         return null;
     }
 
+    export const tabGroups: TabGroup[] = [];
+
+    export class Evt {
+        public static TabDeactivate = 'workspace.tab.deactivate';
+        public static UpdateTabBar = 'workspace.tab.update';
+    }
 
     export class TabGroup {
 
-        public tabContainer: TabContainer;
-        public contentContainer: ContentContainer;
+        public tabContainer: Tabs.TabContainer;
+        public contentContainer: Tabs.ContentContainer;
 
         protected _element: HTMLDivElement;
 
@@ -40,8 +38,8 @@ namespace Workspace.Tabs {
 
         public constructor(element: HTMLDivElement) {
             this._element = element;
-            this.tabContainer = new TabContainer(this);
-            this.contentContainer = new ContentContainer(this);
+            this.tabContainer = new Tabs.TabContainer(this);
+            this.contentContainer = new Tabs.ContentContainer(this);
             // this.id = (Math.random().toString(36) + Math.random().toString(36)).substr(2, 6);
         }
 

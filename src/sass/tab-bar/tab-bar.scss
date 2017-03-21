@@ -5,7 +5,7 @@ $tab-bgcolor-disabled: rgba(255, 255, 255, .25);
 $tab-fgcolor-disabled: rgba(210, 211, 209, .25);
 
 .workspace-tabs {
-    font-family: Arial, Helvetica, sans-serif;
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
     position: relative;
 
     & * {
@@ -16,9 +16,10 @@ $tab-fgcolor-disabled: rgba(210, 211, 209, .25);
         white-space: nowrap;
         overflow: auto;
         font-size: 12px;
-        background: #252526;
+        background: #252525;
         line-height: 2em;
         min-height: 3em;
+        user-select: none;
 
         .tab {
             display: inline-block;
@@ -56,7 +57,6 @@ $tab-fgcolor-disabled: rgba(210, 211, 209, .25);
             }
 
             .title {
-                user-select: none;
                 display: inline-block;
                 vertical-align: middle;
             }
@@ -65,9 +65,9 @@ $tab-fgcolor-disabled: rgba(210, 211, 209, .25);
                 background: transparent;
                 text-align: center;
                 display: inline-block;
-                vertical-align: middle;
+                vertical-align: top;
                 margin-left: 0.5em;
-                font-size: 1.7em;
+                font-size: 1.3em;
                 color: transparent;
             }
 

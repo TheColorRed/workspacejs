@@ -6,24 +6,51 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Test Tabs</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.6.0/prism.min.js"></script>
     <script src="../../dist/workspace.js"></script>
     <script src="../../dist/tabs/tab-bar.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.6.0/themes/prism.min.css">
     <link rel="stylesheet" href="../../dist/tabs/tab-bar.css">
     <style>
         body {
             padding: 0;
             margin: 0;
+            background-color: #263238;
+            color: #fff;
         }
         
         .container {
-            width: 1000px;
+            /*width: 1000px;*/
             height: 100vh;
             margin: auto;
         }
+        
+        code {
+            font-family: monospace;
+            background-color: ghostwhite;
+            color: royalblue;
+            padding: 2px 5px;
+            border-radius: 2px;
+        }
+        
+        section {
+            width: 1000px;
+            margin: auto;
+        }
+        
+        button,
+        input[type="button"] {
+            text-transform: uppercase;
+            padding: 10px 20px;
+            background-color: #007acc;
+            color: #fff;
+            border: 0;
+        }
     </style>
     <script>
+        let tabGroup;
         window.addEventListener('DOMContentLoaded', e => {
-            let tabGroup = Workspace.Tabs.tabGroup('#tabs1');
+            tabGroup = Workspace.tabGroup('#tabs1');
             if (tabGroup) {
                 // Setup an iframe for content
                 let iframe = document.createElement('iframe');
@@ -32,19 +59,28 @@
                 iframe.height = '800';
 
                 // Setup tab one for variable testing
-                let tab1 = new Workspace.Tabs.Tab({ title: 'Usage', contentUrl: './ajax/usage.html', closable: false, movable: false });
+                let tab1 = new Workspace.Tab(
+                    { title: 'Usage', contentUrl: './ajax/usage.html', closable: false, movable: false },
+                    () => Prism.highlightAll()
+                );
 
                 tabGroup.addTab(tab1);
-                tabGroup.addTab(new Workspace.Tabs.Tab({ title: 'Tab with iFrame', content: iframe }));
-                tabGroup.addTab(new Workspace.Tabs.Tab({ title: 'Tab Disabled', enabled: false }));
-                tabGroup.addTab(new Workspace.Tabs.Tab({ title: 'Tool Tip', tooltip: 'I am a tooltip', contentUrl: './ajax/tooltip.html' }));
-                tabGroup.addTab(new Workspace.Tabs.Tab({ title: 'Tab 5' }));
-                tabGroup.addTab(new Workspace.Tabs.Tab({ title: 'Tab 6' }));
-                tabGroup.addTab(new Workspace.Tabs.Tab({ title: 'Tab 7' }));
-                tabGroup.addTab(new Workspace.Tabs.Tab({ title: 'Tab 8' }));
+                tabGroup.addTab(new Workspace.Tab({ title: 'Tab with iFrame', content: iframe }));
+                tabGroup.addTab(new Workspace.Tab(
+                    { title: 'Tooltip', tooltip: 'I am a tooltip', contentUrl: './ajax/tooltip.html' },
+                    () => Prism.highlightAll()
+                ));
+                tabGroup.addTab(new Workspace.Tab({ title: 'Activate tab from code', contentUrl: './ajax/activate.html' }, () => Prism.highlightAll()));
+                tabGroup.addTab(new Workspace.Tab({ title: 'Tab 6' }));
+                tabGroup.addTab(new Workspace.Tab({ title: 'Tab 7' }));
+                tabGroup.addTab(new Workspace.Tab({ title: 'Tab 8' }));
+                tabGroup.addTab(new Workspace.Tab({ title: 'Tab Disabled', enabled: false }));
                 tabGroup.activate(0);
             }
         });
+        function goToTab(idx) {
+            tabGroup.activate(idx);
+        }
     </script>
 </head>
 

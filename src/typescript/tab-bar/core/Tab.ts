@@ -1,4 +1,4 @@
-namespace Workspace.Tabs {
+namespace Workspace {
 
     export interface TabOptions {
         title?: string,
@@ -19,10 +19,10 @@ namespace Workspace.Tabs {
 
         protected _element: HTMLDivElement;
         protected _icon: HTMLImageElement;
-        protected _title: string = 'Tab';
+        protected _title: string = 'Untitled';
         protected _initIndex: number | undefined;
         protected _init: boolean = false;
-        protected _content: Content;
+        protected _content: Tabs.Content;
 
         protected _options: TabOptions | undefined;
 
@@ -31,8 +31,10 @@ namespace Workspace.Tabs {
         protected _isClosable: boolean = true;
         protected _isMovable: boolean = true;
 
+        protected _contentLoaded: Function | undefined;
+
         public get element(): HTMLDivElement { return this._element; }
-        public get content(): Content { return this._content; }
+        public get content(): Tabs.Content { return this._content; }
 
         ////////////////////////////////////////////////////////////////////////
         /// Tab toggles
@@ -76,8 +78,9 @@ namespace Workspace.Tabs {
             this.element.title = value;
         }
 
-        public constructor(options?: TabOptions) {
+        public constructor(options?: TabOptions, onContentLoaded?: Function) {
             this._options = options;
+            this._contentLoaded = onContentLoaded;
         }
 
         public setTabGroup(tabGroup: TabGroup) {
@@ -101,7 +104,7 @@ namespace Workspace.Tabs {
         }
 
         private setContent(content?: HTMLElement | string) {
-            this._content = new Content(this);
+            this._content = new Tabs.Content(this);
             this._content.createContent(content || '');
         }
 
@@ -122,9 +125,11 @@ namespace Workspace.Tabs {
             if (this._options && this._options.contentUrl) {
                 Http.request(this._options.contentUrl).success(response => {
                     this.setContent(response);
+                    this._contentLoaded ? this._contentLoaded(response) : null;
                 });
             } else if (this._options && this._options.content) {
                 this.setContent(this._options.content);
+                this._contentLoaded ? this._contentLoaded(this._options.content) : null;
             }
 
             // Append to the tab bar

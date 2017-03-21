@@ -1,0 +1,16 @@
+<section>
+    <h1>Activating tabs from code</h1>
+    <p>Tabs can be easily activated from within code by passing either an index or the tab instance to <code>TabGroup.activate()</code></p>
+    <p><button onclick="goToTab(1)" style="text-transform: uppercase">Go To Tab 1</button></p>
+    <pre><code class="language-javascript">// Get a tab group
+let tabGroup = Workspace.tabGroup('#tab-group-1');
+
+// Add two tabs to the group
+tabGroup.addTab(new Workspace.Tab({ title: 'Tab 1' }));
+tabGroup.addTab(new Workspace.Tab({ title: 'Tab 2' }));
+
+// Activate the second tab
+// Tab indexes are zero based just like arrays
+tabGroup.activate(1);</code></pre>
+    <p><b>Note:</b> If a tab is moved, it's index also changes. Move a new tab to position 2 (1 in the index) to see.</p>
+</section>
